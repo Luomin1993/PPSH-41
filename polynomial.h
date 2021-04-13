@@ -41,7 +41,8 @@ typedef struct {
 void Monomial_make(Monomial * const pThisMonomial, Symbol*  const ARR_SYMBOLS, int16_t* ARR_COEFF,int16_t* ARR_POWER, int16_t DIM_SYMBOLS);
 char* Monomial_getMonomial(Monomial const * const pThisMonomial);
 int16_t Monomial_getMonomialValue(Monomial const * const pThisMonomial);
-
+void Monomial_print_info(Monomial const * const pThisMonomial);
+void Monomial_optProduct(Monomial const * const pMonomial_1st,Monomial const * const pMonomial_2nd,Monomial* pMonomial_res);
 #endif /* MONOMIAL_H */
 
 
@@ -64,5 +65,6 @@ typedef struct {
 void Polynomial_make(Polynomial * const pThisPolynomial, Symbol*  const POLY_NAME, Monomial* ARR_MONOMIALS,int16_t* ARR_MONOMIALS_COEFF, int16_t DIM_MONOMIALS);
 char* Polynomial_getPolynomial(Polynomial const * const pThisPolynomial);
 int16_t Polynomial_getPolynomialValue(Polynomial const * const pThisPolynomial);
-
+Polynomial* Polynomial_optAdd(Polynomial const * const pPolynomial_1st,Polynomial const * const pPolynomial_2nd);
+Polynomial* Polynomial_optProduct(Polynomial const * const pPolynomial_1st,Polynomial const * const pPolynomial_2nd);
 #endif /* POLYNOMIAL_H */

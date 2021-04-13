@@ -89,8 +89,8 @@ void Polynomial_make(Polynomial * const pThisPolynomial, Symbol*  const POLY_NAM
     pThisPolynomial->ARR_MONOMIALS = ARR_MONOMIALS;
     pThisPolynomial->ARR_MONOMIALS_COEFF = ARR_MONOMIALS_COEFF;
     pThisPolynomial->DIM_MONOMIALS = DIM_MONOMIALS;
-    strcpy(pThisMonomial->STR_POLYNOMIAL, "");
-    for (int INDEX = 0; INDEX < pThisMonomial->DIM_MONOMIALS; ++INDEX)
+    strcpy(pThisPolynomial->STR_POLYNOMIAL, "");
+    for (int INDEX = 0; INDEX < pThisPolynomial->DIM_MONOMIALS; ++INDEX)
     {
         if(pThisPolynomial->ARR_MONOMIALS_COEFF[INDEX]==0){continue;}
         if (strlen(pThisPolynomial->STR_POLYNOMIAL)>0){strcat(pThisPolynomial->STR_POLYNOMIAL," + ");}
@@ -112,4 +112,53 @@ int16_t Polynomial_getPolynomialValue(Polynomial const * const pThisPolynomial)
         VALUE += Monomial_getMonomialValue( &(pThisPolynomial->ARR_MONOMIALS[INDEX]) );
     }
     return VALUE%2;
+}
+
+
+// ------------------------ OPERATIONS API --------------------------------
+void init_monomial_by(Monomial* pMonomial_res,Monomial const * const pMonomial_1st)
+{
+    pMonomial_res->DIM_SYMBOLS = pMonomial_1st->DIM_SYMBOLS;
+    pMonomial_res->ARR_SYMBOLS = pMonomial_1st->ARR_SYMBOLS;
+    pMonomial_res->ARR_POWER = (int16_t*)malloc( sizeof(int16_t)*pMonomial_res->DIM_SYMBOLS );
+    memcpy(pMonomial_res->ARR_POWER,pMonomial_1st->ARR_POWER,sizeof(int16_t)*pMonomial_1st->DIM_SYMBOLS);
+    pMonomial_res->ARR_COEFF = (int16_t*)malloc( sizeof(int16_t)*pMonomial_res->DIM_SYMBOLS );
+    memcpy(pMonomial_res->ARR_COEFF,pMonomial_1st->ARR_COEFF,sizeof(int16_t)*pMonomial_1st->DIM_SYMBOLS);
+    // int16_t TMP_ARR_POWER[pMonomial_res->DIM_SYMBOLS];
+    // pMonomial_res->ARR_POWER = TMP_ARR_POWER;
+    // for (int INDEX = 0; INDEX < pMonomial_res->DIM_SYMBOLS; ++INDEX){pMonomial_res->ARR_POWER[INDEX] = pMonomial_1st->ARR_POWER[INDEX];}
+    // int16_t TMP_ARR_COEFF[pMonomial_res->DIM_SYMBOLS];
+    // pMonomial_res->ARR_COEFF = TMP_ARR_COEFF;
+    // for (int INDEX = 0; INDEX < pMonomial_res->DIM_SYMBOLS; ++INDEX){pMonomial_res->ARR_COEFF[INDEX] = pMonomial_1st->ARR_COEFF[INDEX];}
+}
+
+void print_arr_num(int16_t const * const ARR_COEFF,int16_t DIM_SYMBOLS)
+{
+    //int DIM_SYMBOLS=sizeof(ARR_COEFF);
+    for (int INDEX = 0; INDEX < DIM_SYMBOLS; ++INDEX){printf("%d,",ARR_COEFF[INDEX]);}
+    printf("\n");
+}
+
+void Monomial_print_info(Monomial const * const pThisMonomial)
+{
+    printf("---------- INFO of Monomial ----------\n");
+}
+
+void Monomial_optProduct(Monomial const * const pMonomial_1st,Monomial const * const pMonomial_2nd,Monomial* pMonomial_res)
+{
+    if (pMonomial_1st->ARR_SYMBOLS != pMonomial_2nd->ARR_SYMBOLS){return;}
+    init_monomial_by(pMonomial_res,pMonomial_1st);
+    print_arr_num(pMonomial_2nd->ARR_POWER,pMonomial_2nd->DIM_SYMBOLS);
+    Monomial_make(pMonomial_res,pMonomial_res->ARR_SYMBOLS,pMonomial_res->ARR_COEFF,pMonomial_res->ARR_POWER,pMonomial_res->DIM_SYMBOLS);
+    print_arr_num(pMonomial_res->ARR_POWER,pMonomial_res->DIM_SYMBOLS);
+    print_arr_num(pMonomial_res->ARR_POWER,pMonomial_res->DIM_SYMBOLS);
+    for (int INDEX = 0; INDEX < pMonomial_res->DIM_SYMBOLS; ++INDEX)
+    {
+        //printf("%d\n",INDEX);
+        //print_arr_num(pMonomial_res->ARR_POWER,pMonomial_res->DIM_SYMBOLS);
+        pMonomial_res->ARR_POWER[INDEX] = pMonomial_res->ARR_POWER[INDEX]+pMonomial_2nd->ARR_POWER[INDEX];
+        //(pMonomial_res->ARR_POWER)[INDEX] = (pMonomial_res->ARR_POWER)[INDEX]+1;
+    }
+    print_arr_num(pMonomial_res->ARR_POWER,pMonomial_res->DIM_SYMBOLS);
+    Monomial_make(pMonomial_res,pMonomial_res->ARR_SYMBOLS,pMonomial_res->ARR_COEFF,pMonomial_res->ARR_POWER,pMonomial_res->DIM_SYMBOLS);
 }
