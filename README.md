@@ -1,4 +1,4 @@
 # PPSH-41
-C Library for Computational Commutative Algebra
+C++ for Computational Commutative Algebra(F2-Polynomial) 
 
 ![logo](logo.png)
