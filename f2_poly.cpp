@@ -100,41 +100,82 @@ void ppsh_subs_by_dict(GiNaC::ex & POLYNOMIAL,GiNaC::exmap TAB_MONOMIALS_PAIR)
 std::vector<int> ppsh_coeff_pow_of(GiNaC::ex const& MONINOMIAL,std::vector<GiNaC::symbol> const& ITEMS_VARS)
 {
     std::vector<int> COEFF_POW;
-    if(MONINOMIAL.nops()>1){return COEFF_POW;}
+    //if(MONINOMIAL.nops()>2){return COEFF_POW;}
+    cout<<MONINOMIAL<<" ";
     for (int INDEX_ITEM = 0; INDEX_ITEM < ITEMS_VARS.size(); ++INDEX_ITEM)
     {
         COEFF_POW.push_back(MONINOMIAL.degree(ITEMS_VARS[INDEX_ITEM]));
+        cout<<MONINOMIAL.degree(ITEMS_VARS[INDEX_ITEM])<<" ";
     }
+    cout<<endl;
     return COEFF_POW;
 }
 
+
 GiNaC::ex ppsh_simplify_mono(GiNaC::ex MONINOMIAL,std::vector<GiNaC::symbol> const& ITEMS_VARS)
 {
-    //GiNaC::ex MONINOMIAL_SMF;
+    GiNaC::ex MONINOMIAL_SMF = MONINOMIAL;
     std::vector<int> COEFF_POW = ppsh_coeff_pow_of(MONINOMIAL,ITEMS_VARS);
     for (int INDEX_ITEM = 0; INDEX_ITEM < COEFF_POW.size(); ++INDEX_ITEM)
     {
+        if(COEFF_POW[INDEX_ITEM]<2){continue;}
         MONINOMIAL = ITEMS_VARS[INDEX_ITEM]*(MONINOMIAL/GiNaC::pow(ITEMS_VARS[INDEX_ITEM],COEFF_POW[INDEX_ITEM]));
+        //cout<<" ------ "<<GiNaC::pow(ITEMS_VARS[INDEX_ITEM],COEFF_POW[INDEX_ITEM])<<endl;
     }
     //return MONINOMIAL_SMF;
+    cout<<MONINOMIAL_SMF<<" -- smf --> "<<MONINOMIAL<<endl;
     return MONINOMIAL;
+}
+
+int ppsh_coeff_of_mono(GiNaC::ex const& MONINOMIAL,std::vector<GiNaC::symbol> const& ITEMS_VARS,std::vector<GiNaC::ex> const& ITEMS_3rd)
+{
+    int COEFF;
+    GiNaC::ex MONINOMIAL_TMP = ppsh_simplify_mono(MONINOMIAL,ITEMS_VARS);
+    for (int INDEX_ITEM = 0; INDEX_ITEM < ITEMS_3rd.size(); ++INDEX_ITEM)
+    {
+        if (  GiNaC::is_a<GiNaC::numeric>(MONINOMIAL_TMP/ITEMS_3rd[INDEX_ITEM]) )
+        {
+            return GiNaC::ex_to<GiNaC::numeric>(MONINOMIAL_TMP/ITEMS_3rd[INDEX_ITEM]).to_int();
+        }
+    }        
+    return 0;
 }
 
 void ppsh_simplify(GiNaC::ex & POLYNOMIAL,std::vector<GiNaC::symbol> const& ITEMS_VARS,std::vector<GiNaC::ex> const& ITEMS_3rd)
 {
-    std::vector<int> COEFF = ppsh_eq2co(POLYNOMIAL,ITEMS_3rd);
-    int INDEX_MONO = 0;
     GiNaC::ex MONINOMIAL_TMP;
+    GiNaC::ex POLYNOMIAL_SMF = POLYNOMIAL;
+    cout<<POLYNOMIAL<<endl;
+    // descend order;
+    for (int INDEX_MONO = 0; INDEX_MONO < POLYNOMIAL.nops(); ++INDEX_MONO)
+    {
+        MONINOMIAL_TMP = POLYNOMIAL.op(INDEX_MONO);
+        POLYNOMIAL_SMF = POLYNOMIAL_SMF - MONINOMIAL_TMP 
+                                + ppsh_simplify_mono( MONINOMIAL_TMP,ITEMS_VARS );
+        cout<<" f3 = "<<POLYNOMIAL_SMF<<endl;
+    }
+    // descend coeff;
+    std::vector<int> COEFF = ppsh_eq2co(POLYNOMIAL_SMF,ITEMS_3rd);
     for (int INDEX_ITEM = 0; INDEX_ITEM < COEFF.size(); ++INDEX_ITEM)
     {
-        if(!COEFF[INDEX_ITEM]){continue;}
-        MONINOMIAL_TMP = POLYNOMIAL.op(INDEX_MONO);
-        POLYNOMIAL = POLYNOMIAL - MONINOMIAL_TMP 
-                                + (COEFF[INDEX_ITEM]%2)*(ppsh_simplify_mono( MONINOMIAL_TMP,ITEMS_VARS )/COEFF[INDEX_ITEM]);
-        INDEX_MONO++;
+        COEFF[INDEX_ITEM] = COEFF[INDEX_ITEM]%2;
     }
+    POLYNOMIAL = ppsh_co2eq(COEFF,ITEMS_3rd);
     return;
 }
+
+int ppsh_subs_by_solv(GiNaC::ex const& POLYNOMIAL,GiNaC::exmap TAB_SOLV_8I2O)
+{
+    GiNaC::ex POLYNOMIAL_SMF = POLYNOMIAL;
+    /*for (GiNaC::exmap::iterator SOLV_PAIR = TAB_SOLV_8I2O.begin();SOLV_PAIR != TAB_SOLV_8I2O.end();SOLV_PAIR++)
+    {
+        POLYNOMIAL_SMF = POLYNOMIAL_SMF.subs(SOLV_PAIR->first == SOLV_PAIR->second);
+    }*/
+    POLYNOMIAL_SMF = POLYNOMIAL_SMF.subs(TAB_SOLV_8I2O);
+    return ( GiNaC::ex_to<GiNaC::numeric>(POLYNOMIAL_SMF).to_int() )%2;
+}
+
+
 // ==================> PPSH Core Functions END
 
 int main(int argc, char const *argv[])
@@ -211,7 +252,23 @@ int main(int argc, char const *argv[])
     //cout<< f1.subs(x1*x3+sss==sss+x2+x3) <<endl;
 
     // -------------- TEST ppsh_simplify(...) ---------------
-    GiNaC::ex f3 = 2*x2+2*x3+x1+GiNaC::pow(x2,2)+x2*x3;
-    cout<< GiNaC::pow(x1*x2,2).degree(x1) <<endl;
+    // std::vector<GiNaC::symbol> ITEMS_VARS = {x1,x2,x3};
+    // std::vector<GiNaC::ex> ITEMS_3rd = {x1*x2*x3, x1*x3, x1*x2, x2*x3, x1, x2, x3};
+    // GiNaC::ex f3 = 2*x2+2*x3+x1+GiNaC::pow(x2,2)+x2*x3;
+    //cout<< GiNaC::pow(x1*x2,2).degree(x1) <<endl;
+    //ppsh_simplify(f3,ITEMS_VARS,ITEMS_3rd);
+    // cout<< ppsh_simplify_mono(GiNaC::pow(x2,2),ITEMS_VARS) <<endl;
+    // cout<< ppsh_simplify_mono(x2*x3,ITEMS_VARS) <<endl;
+    // cout<< ppsh_simplify_mono(x1,ITEMS_VARS) <<endl;
+    // cout<< ppsh_simplify_mono(2*GiNaC::pow(x3,3),ITEMS_VARS) <<endl;
+    // cout<< ppsh_simplify_mono(3*GiNaC::pow(x1,-1),ITEMS_VARS) <<endl;
+    //cout<< f3 <<endl;
+
+    // -------------- TEST ppsh_subs_by_solv(...) ---------------
+    GiNaC::exmap TAB_SOLV_8I2O{{x1,0}, {x6,0}, {x2,0}, {x7,0}, {x3,1}, {x8,1}, {x4,1}, {x5,0}};
+    GiNaC::ex f3 = x2*x3 + x1*x2*x3 + x6*x7 + x8*x4 + x3 + 1;
+    GiNaC::ex f4 = x2*x5 + x1*x2*x3*x4 + x6*x7 + x8*x4 + x7 + 1;
+    cout<<"f3= "<< ppsh_subs_by_solv(f3,TAB_SOLV_8I2O) <<endl;
+    cout<<"f4= "<< ppsh_subs_by_solv(f4,TAB_SOLV_8I2O) <<endl;
     return 0;
 }
