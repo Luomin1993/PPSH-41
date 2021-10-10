@@ -5,11 +5,10 @@
 #include <fstream>
 #include <ginac/ginac.h>
 #include <map>
-
+// g++ formula_resolution.cpp -o hello -lginac -lcln
 #define MAX_LEN_LINE 200
 
 using namespace std;
-
 
 std::vector<string> read_formulas(const string& FILE_NAME)
 {
@@ -77,20 +76,48 @@ GiNaC::ex make_poly_from_string(const string& PROCESS_STRING,std::map<string,GiN
     return POLYNOMIAL;
 }
 
+std::map<string,GiNaC::symbol> construct_map(const std::vector<GiNaC::symbol>& ITEMS_X)
+{
+    std::map<string,GiNaC::symbol> MAP_STR_SYMBOL;
+    for (int INDEX_i = 0; INDEX_i < ITEMS_X.size(); ++INDEX_i)
+    {
+        MAP_STR_SYMBOL[ITEMS_X[INDEX_i].get_name()] = ITEMS_X[INDEX_i];
+    }
+    return MAP_STR_SYMBOL;
+}
+
+std::vector<GiNaC::ex> ppsh_read_formulas_from_file(const string& FILE_NAME, std::map<string,GiNaC::symbol> MAP_STR_SYMBOL)
+{
+    std::vector<GiNaC::ex> EQUATIONS_192;
+    std::vector<string> FORMULA_STRING_SET = read_formulas("poly.dat");
+    for (int INDEX_i = 0; INDEX_i < FORMULA_STRING_SET.size(); ++INDEX_i)
+    {
+        EQUATIONS_192.push_back(make_poly_from_string(FORMULA_STRING_SET[INDEX_i],MAP_STR_SYMBOL));
+    }
+    return EQUATIONS_192;
+}
+
 int main()
 {
-  //string s = "z1*c1 + z2*c2 + z3*c3 + z4*c4 + z5*c5 + z6*c6 + z7 + z8";
-  //vector<string> v = split(s, " + "); //可按多个字符来分隔;
-  //for(vector<string>::size_type i = 0; i != v.size(); ++i)
-  //{cout << v[i] << " ";}
-  //cout << endl;
-  GiNaC::symbol x1("x1"), x2("x2"), x3("x3"), x4("x4"), x5("x5"), x6("x6"), x7("x7"), x8("x8"), x9("x9");
-  std::map<string,GiNaC::symbol> MAP_STR_SYMBOL = {{"x1",x1 }, {"x2",x2 }, {"x3",x3 }, {"x4",x4 }, {"x5",x5 }, {"x6",x6 }, {"x7",x7 }, {"x8",x8 }, {"x9",x9 }};
-  string STR_POLYNOMIAL = "x1*x2*x3 + x1*x3 + x1 + x2 + x3";
-  cout<< make_poly_from_string(STR_POLYNOMIAL,MAP_STR_SYMBOL) <<endl;
-  /*std::vector<string> FORMULA_STRING_SET = read_formulas("poly.dat");
-  for (int i = 0; i < FORMULA_STRING_SET.size(); ++i)
-  {
-    cout << FORMULA_STRING_SET[i] <<endl;
-  }*/
+    //string s = "z1*c1 + z2*c2 + z3*c3 + z4*c4 + z5*c5 + z6*c6 + z7 + z8";
+    //vector<string> v = split(s, " + "); //可按多个字符来分隔;
+    //for(vector<string>::size_type i = 0; i != v.size(); ++i)
+    //{cout << v[i] << " ";}
+    //cout << endl;
+    GiNaC::symbol x1("x1"), x2("x2"), x3("x3"), x4("x4"), x5("x5"), x6("x6"), x7("x7"), x8("x8"), x9("x9");
+    std::vector<GiNaC::symbol> ITEMS_X {x1, x2, x3, x4, x5, x6, x7, x8, x9};
+    //std::map<string,GiNaC::symbol> MAP_STR_SYMBOL = {{"x1",x1 }, {"x2",x2 }, {"x3",x3 }, {"x4",x4 }, {"x5",x5 }, {"x6",x6 }, {"x7",x7 }, {"x8",x8 }, {"x9",x9 }};
+    std::map<string,GiNaC::symbol> MAP_STR_SYMBOL = construct_map(ITEMS_X);
+    //string STR_POLYNOMIAL = "x1*x2*x3 + x1*x3 + x1 + x2 + x3";
+    //cout<< make_poly_from_string(STR_POLYNOMIAL,MAP_STR_SYMBOL) <<endl;
+    /*std::vector<string> FORMULA_STRING_SET = read_formulas("poly.dat");
+    for (int i = 0; i < FORMULA_STRING_SET.size(); ++i)
+    {
+        cout << FORMULA_STRING_SET[i] <<endl;
+    }*/
+    std::vector<GiNaC::ex> EQUATIONS_192 = ppsh_read_formulas_from_file("poly.dat",MAP_STR_SYMBOL);
+    for (int i = 0; i < EQUATIONS_192.size(); ++i)
+    {
+        cout << EQUATIONS_192[i] <<endl;
+    }
 }
