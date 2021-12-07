@@ -2,6 +2,8 @@
 #include <vector>
 #include <map>
 #include <time.h>
+#include<fstream> 
+#include<iostream>
 // g++ f2_poly.cpp -o hello -lginac -lcln
 
 using namespace std;
@@ -365,6 +367,21 @@ void gaussian_elimination(std::vector<std::vector<int> >& COEFF_MAT)
     }    
 }
 
+void ppsh_write_coeff(const std::vector<std::vector<int> >& COEFF_MAT)
+{
+    ofstream FILEOUT("coeff_ge.mat");
+    for (int i = 0; i < COEFF_MAT.size(); ++i)
+    {
+        std::vector<int> COEFF;
+        for (int j = 0; j < COEFF_MAT[0].size(); ++j)
+        {
+            FILEOUT << COEFF_MAT[i][j];
+            FILEOUT << ' ';
+        }
+        FILEOUT << '\n';
+    }
+    FILEOUT.close();
+}
 
 // ==================> PPSH Core Functions END
 

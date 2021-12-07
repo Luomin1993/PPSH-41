@@ -64,12 +64,22 @@ GiNaC::ex make_poly_from_string(const string& PROCESS_STRING,std::map<string,GiN
         std::vector<string> STR_SYMBOLS = split(STR_MONOMIALS[INDEX_i], "*");
         if (STR_SYMBOLS.size()==1)
         {
+            if(strstr(STR_SYMBOLS[0].c_str(), "^"))
+            {
+                std::vector<string> VAR_SQUARE = split(STR_SYMBOLS[0], "^");
+                POLYNOMIAL+=MAP_STR_SYMBOL[VAR_SQUARE[0] ]*MAP_STR_SYMBOL[VAR_SQUARE[0] ];
+                continue;
+            }
+            if (STR_SYMBOLS[0]=="1")
+            {
+                POLYNOMIAL+=1;continue;
+            }
             POLYNOMIAL+=MAP_STR_SYMBOL[STR_SYMBOLS[0] ];
             continue;
         }
         GiNaC::ex MONOMIAL = 1;
         for (int INDEX_j = 0; INDEX_j < STR_SYMBOLS.size(); ++INDEX_j)
-  {
+        {
             MONOMIAL *= MAP_STR_SYMBOL[STR_SYMBOLS[INDEX_j] ];
         }
         POLYNOMIAL += MONOMIAL;
@@ -90,7 +100,7 @@ std::map<string,GiNaC::symbol> construct_map(const std::vector<GiNaC::symbol>& I
 std::vector<GiNaC::ex> ppsh_read_formulas_from_file(const string& FILE_NAME, std::map<string,GiNaC::symbol> MAP_STR_SYMBOL)
 {
     std::vector<GiNaC::ex> EQUATIONS_192;
-    std::vector<string> FORMULA_STRING_SET = read_formulas("poly.dat");
+    std::vector<string> FORMULA_STRING_SET = read_formulas(FILE_NAME);
     for (int INDEX_i = 0; INDEX_i < FORMULA_STRING_SET.size(); ++INDEX_i)
     {
         EQUATIONS_192.push_back(make_poly_from_string(FORMULA_STRING_SET[INDEX_i],MAP_STR_SYMBOL));
@@ -108,8 +118,12 @@ clock_t start=clock();      // 程序开始计时
 GiNaC::ex POLYNOMIAL;
 
 std::map<string,GiNaC::symbol> MAP_STR_SYMBOL = construct_map(ITEMS_VAR);
-std::vector<GiNaC::ex> ITEMS_ZTT      = ppsh_read_formulas_from_file("ITEMS_ZTT.dat",MAP_STR_SYMBOL);
-std::vector<GiNaC::ex> EQUATIONS_420  = ppsh_read_formulas_from_file("EQUATIONS_420.dat",MAP_STR_SYMBOL);
+std::vector<GiNaC::ex> ITEMS_ZTT      = ppsh_read_formulas_from_file("items_mq20.poly",MAP_STR_SYMBOL);
+std::vector<GiNaC::ex> EQUATIONS_420  = ppsh_read_formulas_from_file("mq20.poly",MAP_STR_SYMBOL);
+
+for (int INDEX = 0; INDEX < ITEMS_ZTT.size(); ++INDEX){ cout<< ITEMS_ZTT[INDEX] <<" ";}
+cout<< EQUATIONS_420[0] <<endl;
+
 
 std::vector<std::vector<int> > COEFFS_ZTT;
 for (int INDEX = 0; INDEX < EQUATIONS_420.size(); ++INDEX)
@@ -118,7 +132,10 @@ for (int INDEX = 0; INDEX < EQUATIONS_420.size(); ++INDEX)
     COEFFS_ZTT.push_back( ppsh_eq2co(EQUATIONS_420[INDEX],ITEMS_ZTT) );
 }
 
-clock_t end=clock();        // 程序结束用时
+gaussian_elimination(COEFFS_ZTT);
+ppsh_write_coeff(COEFFS_ZTT);
+
+	clock_t end=clock();        // 程序结束用时
 double endtime=(double)(end-start)/CLOCKS_PER_SEC;
 cout<<"Total time: "<<endtime<<" s"<<endl;     //s为单位
 }
