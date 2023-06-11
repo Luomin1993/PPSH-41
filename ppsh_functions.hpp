@@ -1,10 +1,13 @@
 #include <ginac/ginac.h>
 #include <vector>
 #include <map>
+#include <math.h>
 #include <time.h>
 #include<fstream> 
 #include<iostream>
 // g++ f2_poly.cpp -o hello -lginac -lcln
+
+#define MAX_LEN_LINE 3000
 
 using namespace std;
 
@@ -17,6 +20,7 @@ void print_coeff(std::vector<int> const& COEFF_POW)
     }
     cout<<" ]"<<endl;
 }
+
 
 int ppsh_size_of(GiNaC::ex const& POLYNOMIAL)
 {
@@ -99,6 +103,7 @@ std::vector<GiNaC::ex> ppsh_monomials_of(GiNaC::ex const& POLYNOMIAL)
 {
     std::vector<GiNaC::ex> MONINOMIALS;
     for (int INDEX_MONO = 0; INDEX_MONO < POLYNOMIAL.nops(); ++INDEX_MONO){MONINOMIALS.push_back(POLYNOMIAL.op(INDEX_MONO));}
+    if(POLYNOMIAL.nops()==0 && (POLYNOMIAL+11331).nops() >1){MONINOMIALS.push_back((POLYNOMIAL+11331).op(0));}
     return MONINOMIALS;
 }
 
@@ -137,7 +142,7 @@ GiNaC::ex ppsh_simplify_mono(GiNaC::ex MONINOMIAL,std::vector<GiNaC::symbol> con
 
 void ppsh_simplify(GiNaC::ex & POLYNOMIAL,std::vector<GiNaC::symbol> const& ITEMS_VARS)
 {
-    if(POLYNOMIAL==0){return;}
+    if(POLYNOMIAL==0 or POLYNOMIAL==1){return;}
     GiNaC::ex MONINOMIAL_TMP; int COEFF_TMP;
     GiNaC::ex POLYNOMIAL_SMF = POLYNOMIAL;
     //cout<<POLYNOMIAL<<endl;
@@ -381,6 +386,125 @@ void ppsh_write_coeff(const std::vector<std::vector<int> >& COEFF_MAT)
         FILEOUT << '\n';
     }
     FILEOUT.close();
+}
+
+// =======================  Reading Functions  =======================
+std::vector<string> read_formulas(const string& FILE_NAME)
+{
+    char THIS_LINE[MAX_LEN_LINE];
+    string FORMULA_STRING;
+    string TMP_VAR;
+    std::ifstream FILEIN(FILE_NAME);
+    std::vector<string> FORMULA_STRING_SET;
+    for (;;)
+    {
+        FILEIN.getline( THIS_LINE, sizeof(THIS_LINE));
+        if ( FILEIN.eof()){break;}
+        std::vector<int> COEFF;
+        for (int j = 0; j < MAX_LEN_LINE; ++j)
+        {
+            if ( THIS_LINE[j]=='\0'){break;}
+            TMP_VAR = THIS_LINE[j];
+            FORMULA_STRING += TMP_VAR;
+        }
+        FORMULA_STRING_SET.push_back(FORMULA_STRING);
+        FORMULA_STRING.clear();
+    }
+    FILEIN.close();
+    return FORMULA_STRING_SET;
+}
+
+vector<string> split(const string& PROCESS_STRING, const string& DELIM) {  
+    vector<string> res;  
+    if("" == PROCESS_STRING) return res;  
+    char * strs = new char[PROCESS_STRING.length() + 1] ;
+    strcpy(strs, PROCESS_STRING.c_str());   
+   
+    char * d = new char[DELIM.length() + 1];  
+    strcpy(d, DELIM.c_str());  
+   
+    char *p = strtok(strs, d);  
+    while(p) {  
+      string s = p; //分割得到的字符串转换为string类型  
+      res.push_back(s); //存入结果数组  
+      p = strtok(NULL, d);  
+    }
+    return res;  
+}
+
+GiNaC::ex make_poly_from_string(const string& PROCESS_STRING,std::map<string,GiNaC::symbol> MAP_STR_SYMBOL)
+{
+    std::vector<string> STR_MONOMIALS = split(PROCESS_STRING, " + ");
+    GiNaC::ex POLYNOMIAL = 0;
+    for (int INDEX_i = 0; INDEX_i < STR_MONOMIALS.size(); ++INDEX_i)
+    {
+        std::vector<string> STR_SYMBOLS = split(STR_MONOMIALS[INDEX_i], "*");
+        if (STR_SYMBOLS.size()==1)
+        {
+            if(strstr(STR_SYMBOLS[0].c_str(), "^"))
+            {
+                std::vector<string> VAR_SQUARE = split(STR_SYMBOLS[0], "^");
+                POLYNOMIAL+=MAP_STR_SYMBOL[VAR_SQUARE[0] ]*MAP_STR_SYMBOL[VAR_SQUARE[0] ];
+                continue;
+            }
+            if (STR_SYMBOLS[0]=="1")
+            {
+                POLYNOMIAL+=1;continue;
+            }
+            POLYNOMIAL+=MAP_STR_SYMBOL[STR_SYMBOLS[0] ];
+            continue;
+        }
+        GiNaC::ex MONOMIAL = 1;
+        for (int INDEX_j = 0; INDEX_j < STR_SYMBOLS.size(); ++INDEX_j)
+        {
+            MONOMIAL *= MAP_STR_SYMBOL[STR_SYMBOLS[INDEX_j] ];
+        }
+        POLYNOMIAL += MONOMIAL;
+    }
+    return POLYNOMIAL;
+}
+
+std::map<string,GiNaC::symbol> construct_map(const std::vector<GiNaC::symbol>& ITEMS_X)
+{
+    std::map<string,GiNaC::symbol> MAP_STR_SYMBOL;
+    for (int INDEX_i = 0; INDEX_i < ITEMS_X.size(); ++INDEX_i)
+    {
+        MAP_STR_SYMBOL[ITEMS_X[INDEX_i].get_name()] = ITEMS_X[INDEX_i];
+    }
+    return MAP_STR_SYMBOL;
+}
+
+std::vector<GiNaC::ex> ppsh_read_formulas_from_file(const string& FILE_NAME, std::map<string,GiNaC::symbol> MAP_STR_SYMBOL)
+{
+    std::vector<GiNaC::ex> EQUATIONS_192;
+    std::vector<string> FORMULA_STRING_SET = read_formulas(FILE_NAME);
+    for (int INDEX_i = 0; INDEX_i < FORMULA_STRING_SET.size(); ++INDEX_i)
+    {
+        EQUATIONS_192.push_back(make_poly_from_string(FORMULA_STRING_SET[INDEX_i],MAP_STR_SYMBOL));
+    }
+    return EQUATIONS_192;
+}
+
+GiNaC::exmap ppsh_read_solv_from_file(const string& FILE_NAME, std::vector<GiNaC::symbol> ITEMS_VARS)
+{
+    GiNaC::exmap TAB_SOLV;
+    std::vector<string> FORMULA_STRING_SET = read_formulas(FILE_NAME);
+    for (int INDEX_i = 0; INDEX_i < FORMULA_STRING_SET.size(); ++INDEX_i)
+    {
+        TAB_SOLV[ITEMS_VARS[INDEX_i]] = atoi(FORMULA_STRING_SET[INDEX_i].c_str());
+    }
+    return TAB_SOLV;
+}
+
+bool ppsh_is_sub_poly(GiNaC::ex POLYNOMIAL_SUBS,GiNaC::ex POLYNOMIAL)
+{
+    std::vector<GiNaC::ex> MONINOMIALS = ppsh_monomials_of(POLYNOMIAL_SUBS);
+    for (int INDEX_i = 0; INDEX_i < MONINOMIALS.size(); ++INDEX_i)
+    {
+        //if (!GiNaC::has(POLYNOMIAL,MONINOMIALS[INDEX_i])){return false;}
+        if ( (POLYNOMIAL - MONINOMIALS[INDEX_i] ).nops() > POLYNOMIAL.nops() ){return false;}
+    }
+    return true;
 }
 
 // ==================> PPSH Core Functions END
