@@ -5,12 +5,16 @@
 #include <time.h>
 #include<fstream> 
 #include<iostream>
-// g++ f2_poly.cpp -o hello -lginac -lcln
 
 #define MAX_LEN_LINE 3000
 
 using namespace std;
 
+// =======================  Symbols Define  =======================
+GiNaC::symbol a("a"),x0("x0"), x1("x1"), x2("x2"), x3("x3"), x4("x4"), x5("x5"), x6("x6"), x7("x7"), x8("x8"), x9("x9"), x10("x10"), x11("x11"), x12("x12"), x13("x13"), x14("x14"), x15("x15"), x16("x16"), x17("x17"), x18("x18"), x19("x19"), x20("x20"), x21("x21"), x22("x22"), x23("x23"), x24("x24"), x25("x25"), x26("x26"), x27("x27"), x28("x28"), x29("x29"), x30("x30"), x31("x31"), x32("x32"), x33("x33"), x34("x34"), x35("x35"), x36("x36"), x37("x37"), x38("x38"), x39("x39"), x40("x40"), x41("x41"), x42("x42"), x43("x43"), x44("x44"), x45("x45"), x46("x46"), x47("x47"), x48("x48"), x49("x49"), x50("x50"), x51("x51"), x52("x52"), x53("x53"), x54("x54"), x55("x55"), x56("x56"), x57("x57"), x58("x58"), x59("x59"), x60("x60"), x61("x61"), x62("x62"), x63("x63"), x64("x64"), x65("x65"), x66("x66"), x67("x67"), x68("x68"), x69("x69"), x70("x70"), x71("x71"), x72("x72"), x73("x73"), x74("x74"), x75("x75"), x76("x76"), x77("x77"), x78("x78"), x79("x79"), x80("x80"), x81("x81"), x82("x82"), x83("x83"), x84("x84"), x85("x85"), x86("x86"), x87("x87"), x88("x88"), x89("x89"), x90("x90"), x91("x91"), x92("x92"), x93("x93"), x94("x94"), x95("x95"), x96("x96"), x97("x97"), x98("x98"), x99("x99"), x100("x100");
+std::vector<GiNaC::symbol> ITEMS_VARS {x0,x1,x2,x3,x4,x5,x6,x7,x8,x9,x10,x11,x12,x13,x14,x15,x16,x17,x18,x19,x20,x21,x22,x23,x24,x25,x26,x27,x28,x29,x30,x31,x32,x33,x34,x35,x36,x37,x38,x39,x40,x41,x42,x43,x44,x45,x46,x47,x48,x49,x50,x51,x52,x53,x54,x55,x56,x57,x58,x59,x60,x61,x62,x63,x64,x65,x66,x67,x68,x69,x70,x71,x72,x73,x74,x75,x76,x77,x78,x79,x80,x81,x82,x83,x84,x85,x86,x87,x88,x89,x90,x91,x92,x93,x94,x95,x96,x97,x98,x99,x100};
+
+// =======================  Functions Define  =======================
 void print_coeff(std::vector<int> const& COEFF_POW)
 {
     cout<<"[ ";
@@ -507,101 +511,126 @@ bool ppsh_is_sub_poly(GiNaC::ex POLYNOMIAL_SUBS,GiNaC::ex POLYNOMIAL)
     return true;
 }
 
-// ==================> PPSH Core Functions END
-
-/* --------------- TEST  ---------------------------------
-int main(int argc, char const *argv[])
+// ============== Extension Field Functions ====================
+void func_decimal_conv( int INDEX_i, int PRIME_NUM, int EXTEN_NUM, std::vector<int> &COEFF_VEC)
 {
-    GiNaC::symbol x1("x1"), x2("x2"), x3("x3"), x4("x4"), x5("x5"), x6("x6"), x7("x7"), x8("x8"), x9("x9");
-    GiNaC::ex f1 = x1*x2*x3 + x1*x3 + x1 + x2 + x3;
-    GiNaC::ex f2 = 4*GiNaC::pow(x1,3)*x2 + 5*x1*GiNaC::pow(x2,2) + 3*x2- GiNaC::pow(x1+x2,2) + 2*GiNaC::pow(x2+2,2) - 8;
-    f2 = f2.expand();
-    cout<< f1 <<endl;
-    cout<< f2 <<endl;
-    GiNaC::ex sss = GiNaC::wild();
-    GiNaC::ex ddd = GiNaC::wild();
-    GiNaC::exmap LIST;
-    GiNaC::exset FOUND_SET;
-    
-    //cout<< GiNaC::has(f1,sss*x1*x3) <<endl;
-    //cout<< GiNaC::has(f1,sss*x1*x2*x3) <<endl;
-    //cout<< GiNaC::has(f1,sss*x3) <<endl;
-    
-    cout<< "=====================" <<endl;
-    //cout<< GiNaC::match(f1,sss+ddd*x1*x3,LIST) <<endl;
-    //cout<< LIST <<endl;
-    //cout<< GiNaC::match(f1,sss*x1*x2*x3,LIST) <<endl;
-    //cout<< GiNaC::match(f1,sss*x3,LIST) <<endl;
-    //cout<< GiNaC::match(f1,sss*x1*x3,LIST) <<endl;
-    //cout<< LIST <<endl;
-    //cout<< GiNaC::match(f1,x1,LIST) <<endl;
-    //cout<< LIST <<endl;
-    //cout<< GiNaC::has(f1,x1*x2) <<endl;
-    //cout<< f1.coeff(x1*x3,1) <<endl;
-    //cout<< GiNaC::subs(GiNaC::subs(f1,x1==0),x2==1) <<endl;
-    
-    //cout<< ppsh_has(f1,x1*x3) <<endl;
-    //cout<< ppsh_has(f1,x1*x2) <<endl;
-    //cout<< ppsh_has(f1,x1) <<endl;
-    //cout<< ppsh_has(f1,x2*x3) <<endl;
-    //cout<< ppsh_has_mul(f2,x2) <<endl;
-    //cout<< ppsh_has_mul(f2,x2*GiNaC::pow(x1,3)) <<endl;
-    //cout<< ppsh_has_mul(f2,x2*x1) <<endl;
-
-    // cout<< f2.coeff(x1,2) <<endl;
-    // cout<< f2.coeff(x1*x2,1) <<endl;
-    // cout<< GiNaC::find(f2,sss*x1*x2,FOUND_SET) <<endl;
-    // cout<< FOUND_SET <<endl;
-
-    //for(size_t i=0; i<f2.nops(); i++){cout<< f2.op(i) <<endl;}
-    
-    //std::vector<GiNaC::ex> MONINOMIALS;MONINOMIALS.resize(f2.nops());
-    //std::copy(f2.begin(), f2.end(), MONINOMIALS.begin());
-    //for(size_t i=0; i<MONINOMIALS.size(); i++){cout<< MONINOMIALS[i] <<endl;}
-    
-    // -------------- TEST ppsh_eq2co(...) ---------------
-    // std::vector<GiNaC::ex> ITEMS_3rd = {x1*x2*x3, x1*x3, x1*x2, x2*x3, x1, x2, x3};
-    // std::vector<int> COEFF = ppsh_eq2co(f1,ITEMS_3rd);
-    // for(size_t i=0; i<COEFF.size(); i++){cout<< COEFF[i] <<endl;}
-    
-    // -------------- TEST ppsh_co2eq(...) ---------------
-    // std::vector<GiNaC::ex> ITEMS_3rd = {x1*x2*x3, x1*x3, x1*x2, x2*x3, x1, x2, x3};
-    // std::vector<int> COEFF = {1,0,0,0,1,1,1};
-    // GiNaC::ex f3 = ppsh_co2eq(COEFF,ITEMS_3rd);
-    // cout<< f3 <<endl;
-
-    // -------------- TEST ppsh_monomials_of(...) ---------------
-    // std::vector<GiNaC::ex> MONINOMIALS = ppsh_monomials_of(f1);
-    // for(size_t i=0; i<MONINOMIALS.size(); i++){cout<< MONINOMIALS[i] <<endl;}
-    
-    // -------------- TEST ppsh_subs_by_dict(...) ---------------
-    //std::map<GiNaC::ex,GiNaC::ex> TAB_MONOMIALS_PAIR{{x1*x2,x1+x3},{x1*x3,x2+x3}};
-    //  GiNaC::exmap TAB_MONOMIALS_PAIR;TAB_MONOMIALS_PAIR[x1*x2]=x1+x3;TAB_MONOMIALS_PAIR[x1*x3]=x2+x3;
-    //  ppsh_subs_by_dict(f1,TAB_MONOMIALS_PAIR);
-    //  cout<< f1 <<endl;
-    //cout<< ppsh_subs_by_dict_mono(x1*x3,TAB_MONOMIALS_PAIR) <<endl;
-    //cout<< f1.subs(sss*x1*x2==sss*(x1+x3)) <<endl;
-    //cout<< f1.subs(x1*x3+sss==sss+x2+x3) <<endl;
-
-    // -------------- TEST ppsh_simplify(...) ---------------
-    // std::vector<GiNaC::symbol> ITEMS_VARS = {x1,x2,x3};
-    // std::vector<GiNaC::ex> ITEMS_3rd = {x1*x2*x3, x1*x3, x1*x2, x2*x3, x1, x2, x3};
-    // GiNaC::ex f3 = 2*x2+2*x3+x1+GiNaC::pow(x2,2)+x2*x3;
-    //cout<< GiNaC::pow(x1*x2,2).degree(x1) <<endl;
-    //ppsh_simplify(f3,ITEMS_VARS,ITEMS_3rd);
-    // cout<< ppsh_simplify_mono(GiNaC::pow(x2,2),ITEMS_VARS) <<endl;
-    // cout<< ppsh_simplify_mono(x2*x3,ITEMS_VARS) <<endl;
-    // cout<< ppsh_simplify_mono(x1,ITEMS_VARS) <<endl;
-    // cout<< ppsh_simplify_mono(2*GiNaC::pow(x3,3),ITEMS_VARS) <<endl;
-    // cout<< ppsh_simplify_mono(3*GiNaC::pow(x1,-1),ITEMS_VARS) <<endl;
-    //cout<< f3 <<endl;
-
-    // -------------- TEST ppsh_subs_by_solv(...) ---------------
-    GiNaC::exmap TAB_SOLV_8I2O{{x1,0}, {x6,0}, {x2,0}, {x7,0}, {x3,1}, {x8,1}, {x4,1}, {x5,0}};
-    GiNaC::ex f3 = x2*x3 + x1*x2*x3 + x6*x7 + x8*x4 + x3 + 1;
-    GiNaC::ex f4 = x2*x5 + x1*x2*x3*x4 + x6*x7 + x8*x4 + x7 + 1;
-    cout<<"f3= "<< ppsh_subs_by_solv(f3,TAB_SOLV_8I2O) <<endl;
-    cout<<"f4= "<< ppsh_subs_by_solv(f4,TAB_SOLV_8I2O) <<endl;
-    return 0;
+    int TRANS_NUM = INDEX_i;
+    for (int INDEX_j = 0; INDEX_j < EXTEN_NUM; ++INDEX_j)
+    {
+        COEFF_VEC[INDEX_j] = TRANS_NUM%PRIME_NUM;
+        TRANS_NUM = TRANS_NUM/PRIME_NUM;
+    }
+    return;
 }
---------------- TEST  ---------------------------------*/
+
+struct extension_field
+{
+    int PRIME_NUM;
+    int EXTEN_NUM;
+    GiNaC::ex IRRED_POLY;
+};
+
+extension_field* construct_extension_field(int const& PRIME_NUM,int const& EXTEN_NUM,GiNaC::ex const& IRRED_POLY)
+{
+    struct extension_field* pt_EXT_FIELD;
+    pt_EXT_FIELD->PRIME_NUM = PRIME_NUM;pt_EXT_FIELD->EXTEN_NUM = EXTEN_NUM;
+    pt_EXT_FIELD->IRRED_POLY = IRRED_POLY;
+    return pt_EXT_FIELD;
+}
+
+GiNaC::ex coeff_mod(const GiNaC::ex& POLYNOMIAL,const int& PRIME_NUM)
+{
+    GiNaC::ex POLYNOMIAL_RES = 0;GiNaC::ex COEFF_LEAD;int COEFF_LEAD_NUM;
+    std::vector<GiNaC::ex> MONOMIALS = ppsh_monomials_of(POLYNOMIAL);
+    //for (int INDEX_i = 0; INDEX_i < MONOMIALS.size(); ++INDEX_i)
+    for (int INDEX_i = 0; INDEX_i <= POLYNOMIAL.degree(a); ++INDEX_i)
+    {
+        COEFF_LEAD = POLYNOMIAL.coeff(a,INDEX_i);
+        COEFF_LEAD_NUM = GiNaC::ex_to<GiNaC::numeric>(COEFF_LEAD).to_int() % PRIME_NUM;
+        if (COEFF_LEAD_NUM<0){COEFF_LEAD_NUM = PRIME_NUM + COEFF_LEAD_NUM;}
+        POLYNOMIAL_RES += COEFF_LEAD_NUM*GiNaC::pow(a,INDEX_i);
+    }
+    return POLYNOMIAL_RES;
+}
+
+GiNaC::ex pseudo_divide(const GiNaC::ex& POLYNOMIAL, const GiNaC::ex& POLYNOMIAL_DIV, const int& PRIME_NUM)
+{
+    GiNaC::ex POLYNOMIAL_RES = POLYNOMIAL;
+    //for (int i=POLYNOMIAL_RES.ldegree(a); i<=POLYNOMIAL_RES.degree(a); ++i) {cout << "The a^" << i << "-coefficient is "<< POLYNOMIAL_RES.coeff(a,i) << endl;}
+    int DIS_DEG;GiNaC::ex COEFF_LEAD;
+    while(POLYNOMIAL_RES.degree(a)>=POLYNOMIAL_DIV.degree(a))
+    {
+        DIS_DEG = POLYNOMIAL_RES.degree(a) - POLYNOMIAL_DIV.degree(a);
+        COEFF_LEAD = POLYNOMIAL_RES.coeff(a,POLYNOMIAL_RES.degree(a));
+        POLYNOMIAL_RES = coeff_mod(POLYNOMIAL_RES - (COEFF_LEAD*POLYNOMIAL_DIV*GiNaC::pow(a, DIS_DEG)).expand(), PRIME_NUM);
+        //cout<<"POLYNOMIAL_RES = "<<POLYNOMIAL_RES<<endl;
+    }
+    POLYNOMIAL_RES = coeff_mod(POLYNOMIAL_RES, PRIME_NUM);
+    return POLYNOMIAL_RES;
+}
+
+class extension_field_element
+{
+public:
+    extension_field* pt_EXT_FIELD;
+    int ELEMENT_INDEX;
+    string SYMBOL;
+    GiNaC::ex POLYNOMIAL;
+    extension_field_element(extension_field* pt_EXT_FIELD,const GiNaC::ex& POLYNOMIAL);
+    //~extension_field_element();
+    extension_field_element operator+(const extension_field_element& EXT_FIELD_ELE_OPS) const;
+    extension_field_element operator*(const extension_field_element& EXT_FIELD_ELE_OPS) const;
+    bool operator<(const extension_field_element& EXT_FIELD_ELE_OPS) const;
+};
+
+struct index_point
+{
+    int ELEMENT_INDEX_1;
+    int ELEMENT_INDEX_2;
+    index_point(int ELEMENT_INDEX_1,int ELEMENT_INDEX_2){this->ELEMENT_INDEX_1 = ELEMENT_INDEX_1;this->ELEMENT_INDEX_2 = ELEMENT_INDEX_2;}
+};
+
+index_point make_index_point(int ELEMENT_INDEX_1,int ELEMENT_INDEX_2)
+{
+    index_point NEW_POINT(ELEMENT_INDEX_1,ELEMENT_INDEX_2);return NEW_POINT;
+}
+
+std::vector<std::vector<int> > init_all_tab(int ORDER_NUM)
+{
+    std::vector<std::vector<int> > TAB_NEW;
+    TAB_NEW.resize(ORDER_NUM);
+    for (int INDEX_i = 0; INDEX_i < ORDER_NUM; ++INDEX_i){TAB_NEW[INDEX_i].resize(ORDER_NUM);}
+    return TAB_NEW;
+}
+
+string print_align(int INDEX_i)
+{
+    string SYMBOL = std::to_string(INDEX_i);
+    int INDEX_NUM = INDEX_i;int BIT_NUM = 0;
+    if (INDEX_NUM==0){INDEX_NUM=1;}
+    while(INDEX_NUM!=0){INDEX_NUM = INDEX_NUM/10;BIT_NUM++;}
+    for (int INDEX_j = 0; INDEX_j < 3 - BIT_NUM; ++INDEX_j){SYMBOL += " ";}
+    return SYMBOL;
+}
+
+class extension_field_class
+{
+public:
+    extension_field* pt_EXT_FIELD;
+    GiNaC::ex IRRED_POLY;
+    int ORDER_NUM;
+    std::vector<extension_field_element> ELEMENTS_SET;
+    GiNaC::exmap TAB_POLY2INDEX;
+    std::map<extension_field_element, int> TAB_ELEMENT2INDEX;
+    std::vector<std::vector<int> > TAB_MULTI;
+    std::vector<std::vector<int> > TAB_DIV;
+    std::vector<std::vector<int> > TAB_ADD;
+    std::vector<std::vector<int> > TAB_SUB;
+    extension_field_class(extension_field* pt_EXT_FIELD,const GiNaC::ex& IRRED_POLY);
+    extension_field_element multi_computing(const extension_field_element& ELEMENT_1,const extension_field_element& ELEMENT_2);
+    extension_field_element add_computing(const extension_field_element& ELEMENT_1,const extension_field_element& ELEMENT_2);
+    extension_field_element div_computing(const extension_field_element& ELEMENT_1,const extension_field_element& ELEMENT_2);
+    extension_field_element sub_computing(const extension_field_element& ELEMENT_1,const extension_field_element& ELEMENT_2);
+    void print_multi_tab();
+};
+// ==================> PPSH Core Functions END
